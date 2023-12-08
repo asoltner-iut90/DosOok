@@ -20,13 +20,21 @@ public class DosRead {
      * @param path the path of the wav file to read
      */
     public void readWavHeader(String path){
-        byte[] header = new byte[44]; // The header is 44 bytes long
-        try {
-            fileInputStream= new FileInputStream(path);
-            fileInputStream.read(header);
-            /*
-              À compléter
-            */
+      byte[] header = new byte[44]; // The header is 44 bytes long
+      try {
+        fileInputStream= new FileInputStream(path);
+        fileInputStream.read(header);
+        
+        //sampleRate
+        byte[] byteSampleRate = {header[24],header[25],header[26],header[27]};
+        sampleRate = byteArrayToInt(byteSampleRate, 0, 32);
+        //dataSize
+        byte[] byteDataSize = {header[40],header[41],header[42],header[43]};
+        dataSize = byteArrayToInt(byteDataSize, 0, 32);
+        //bitsPerSample
+        byte[] byteBitsPerSample = {header[34],header[35]};
+        bitsPerSample = byteArrayToInt(byteBitsPerSample, 0, 16);
+
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -58,24 +66,38 @@ public class DosRead {
      * that becomes the audio attribute
      */
     public void readAudioDouble(){
-        byte[] audioData = new byte[dataSize];
-        try {
-            fileInputStream.read(audioData);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        /*
-          À compléter
-        */
-    }
+      byte[] audioData = new byte[dataSize];
+      try {
+          fileInputStream.read(audioData);
+      } catch (IOException e) {
+          e.printStackTrace();
+      }
+      audio = new double[dataSize / (bitsPerSample / 8)];
+      int numSamples = 0;
+      int bytesPerSample = (bitsPerSample / 8);
+      for (int i = 0; i < audioData.length - bytesPerSample + 1; i += bytesPerSample) {
+          short sample = (short) ((audioData[i + 1] << 8) | (audioData[i] & 0xFF));
+          
+          //byte[] byteSample = { audioData[i+1], audioData[i]};
+          //double sample = byteArrayToInt(byteSample, 0, bitsPerSample);
+          audio[numSamples] = sample;
+          numSamples++;
+      }
+  }
+
+
+        
+    
 
     /**
      * Reverse the negative values of the audio array
      */
     public void audioRectifier(){
-      /*
-        À compléter
-      */
+      for(int i=0; i<audio.length; i++){
+          if(audio[i]<0){
+            audio[i] *= -1;
+          }
+      }
     }
 
     /**
@@ -130,10 +152,19 @@ public class DosRead {
      * @param mode "line" or "point"
      * @param title the title of the window
      */
-    public static void displaySig(double[] sig, int start, int stop, String mode, String title){
-      /*
-        À compléter. Méthode a priori identique à sa version dans DosSend.
-      */
+    public static void displaySig(double[] sig, int start, int stop, String mode, String title){   
+        StdDraw.setCanvasSize(1000,300);
+        StdDraw.setXscale(start, stop);
+        StdDraw.setYscale(-32768,32767);
+        
+        int i;
+        for(i=start; i<stop;i=i+(stop-start)/10){
+            StdDraw.text(i, 0, String.valueOf(i));
+        }
+        for(i=start+1;i<stop; i++){
+            StdDraw.line(i-1, sig[i-1], i, sig[i]);
+        }
+        
     }
 
     /**
@@ -173,6 +204,7 @@ public class DosRead {
         }
 
         displaySig(dosRead.audio, 0, dosRead.audio.length-1, "line", "Signal audio");
+        //displaySig(dosRead.audio, 0, 3000, "line", "Signal audio");
 
         // Close the file input stream
         try {
