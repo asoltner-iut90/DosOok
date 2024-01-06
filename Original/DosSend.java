@@ -257,75 +257,61 @@ public class DosSend {
      */
 
      public static void displaySig(double[] sig, int start, int stop, String mode, String title) {
-        int width = 800;
-        int height = 200;
-    
-        StdDraw.setCanvasSize(width, height);
-        StdDraw.setXscale(0, width);
-        StdDraw.setYscale(0, height);
-    
-        if (mode.equals("line")) {
-            drawLineSignal(sig, start, stop, 0, width, height);
-        } else if (mode.equals("point")) {
-            drawPointSignal(sig, start, stop, 0, width, height);
+        StdDraw.clear();
+        StdDraw.setCanvasSize(800, 600);
+        StdDraw.setXscale(0, sig.length);
+        StdDraw.setYscale(-1, 1);
+
+        if (title != null && !title.isEmpty()) {
+            // Utiliser un texte pour le titre
+            StdDraw.text(sig.length / 2.0, 1.1, title);
         }
-    
-        StdDraw.show();
-    }
-    
 
-
-    /**
-     * Display signals in a window
-     * @param listOfSigs  a list of the signals to display
-     * @param start the first sample to display
-     * @param stop the last sample to display
-     * @param mode "line" or "point"
-     * @param title the title of the window
-     */
-
-     public static void displaySig(List<double[]> listOfSigs, int start, int stop, String mode, String title) {
-        int width = 800;
-        int height = 200;
-    
-        StdDraw.setCanvasSize(width, height);
-        StdDraw.setXscale(0, width);
-        StdDraw.setYscale(0, height);
-    
-        int numSignals = listOfSigs.size();
-        int signalGap = 10;  // Espacement entre les signaux
-    
-        for (int i = 0; i < numSignals; i++) {
-            double[] sig = listOfSigs.get(i);
-    
-            if (mode.equals("line")) {
-                drawLineSignal(sig, start, stop, signalGap * i, width, height);
-            } else if (mode.equals("point")) {
-                drawPointSignal(sig, start, stop, signalGap * i, width, height );
+        if (mode.equals("line")) {
+            for (int i = start + 1; i <= stop; i++) {
+                StdDraw.line(i - 1, sig[i - 1], i, sig[i]);
+            }
+        } else if (mode.equals("point")) {
+            for (int i = start; i <= stop; i++) {
+                StdDraw.point(i, sig[i]);
             }
         }
-    
+
         StdDraw.show();
     }
-    
-    private static void drawLineSignal(double[] sig, int start, int stop, int yOffset, int canvasWidth, int canvasHeight) {
-    int step = canvasWidth / (stop - start);
-    for (int i = start; i < stop - 1; i++) {
-        int x1 = (i - start) * step;
-        int y1 = (int) ((sig[i] + 1) * canvasHeight / 2) + yOffset;
-        int x2 = (i + 1 - start) * step;
-        int y2 = (int) ((sig[i + 1] + 1) * canvasHeight / 2) + yOffset;
-        StdDraw.line(x1, y1, x2, y2);
-    }
-}
-    
-    private static void drawPointSignal(double[] sig, int start, int stop, int yOffset, int canvasWidth, int canvasHeight) {
-        int step = canvasWidth / (stop - start);
-        for (int i = start; i < stop; i++) {
-            int x = (i - start) * step;
-            int y = (int) ((sig[i] + 1) * canvasHeight / 2) + yOffset;
-            StdDraw.point(x, y);
+
+    /**
+     * Display signals in a window using StdDraw
+     * @param listOfSigs a list of the signals to display
+     * @param start      the first sample to display
+     * @param stop       the last sample to display
+     * @param mode       "line" or "point"
+     * @param title      the title of the window
+     */
+    public static void displaySig(List<double[]> listOfSigs, int start, int stop, String mode, String title) {
+        StdDraw.clear();
+        StdDraw.setCanvasSize(800, 600);
+        StdDraw.setXscale(0, listOfSigs.get(0).length);
+        StdDraw.setYscale(-1, 1);
+
+        if (title != null && !title.isEmpty()) {
+            // Utiliser un texte pour le titre
+            StdDraw.text(listOfSigs.get(0).length / 2.0, 1.1, title);
         }
+
+        for (double[] sig : listOfSigs) {
+            if (mode.equals("line")) {
+                for (int i = start + 1; i <= stop; i++) {
+                    StdDraw.line(i - 1, sig[i - 1], i, sig[i]);
+                }
+            } else if (mode.equals("point")) {
+                for (int i = start; i <= stop; i++) {
+                    StdDraw.point(i, sig[i]);
+                }
+            }
+        }
+
+        StdDraw.show();
     }
     
     public static void main(String[] args) {
@@ -350,12 +336,8 @@ public class DosSend {
         System.out.println("\tNombre d'échantillons : "+dosSend.dataMod.length);
         System.out.println("\tDurée : "+dosSend.duree+" s");
         System.out.println();
-
-
-
         // exemple d'affichage du signal modulé dans une fenêtre graphique
-
-        displaySig(dosSend.dataMod, 1000, 3000, "point", "Signal modulé");
+        displaySig(dosSend.dataMod, 1000, 3000, "line", "Signal modulé");
 
     }
 
