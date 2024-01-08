@@ -172,19 +172,17 @@ public class DosRead {
      */
     public static void displaySig(double[] sig, int start, int stop, String mode, String title){
 
-        int maxy = 32768,minx = -32768;
+        int maxy = 32768,miny = -32768;
 
         StdDraw.setCanvasSize(1000,300);
         StdDraw.setXscale(start, stop);
         StdDraw.setYscale(miny,maxy);
         
-        /*
-        for(i=start; i<stop;i=i+(stop-start)/10){
-            if 
-        }*/
+
         int i;
-        for(i=-32768; i<32768;i=i+(stop-start)/10){
-            StdDraw.text(i, 0, String.valueOf(i));
+        
+        for(i=miny; i<maxy;i=i+(maxy-miny)/10){
+            StdDraw.text(100, i, String.valueOf(i));
         }
         for(i=start; i<stop;i=i+(stop-start)/10){
             StdDraw.text(i, 0, String.valueOf(i));
