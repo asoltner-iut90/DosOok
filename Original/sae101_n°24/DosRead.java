@@ -190,11 +190,16 @@ public class DosRead {
      * Print the elements of an array
      * @param data the array to print
      */
-    public static void printIntArray(char[] data) {    
+    public static void printIntArray(char[] data) {
+    
+      System.out.print('[');
       for(int i = 0; i < data.length; i++){//parcours du tableau
+            if(i>0){
+                System.out.print(',');
+            } 
             System.out.print(data[i]);
       }
-      System.out.print('\n');
+      System.out.println(']');
     }
 
 
@@ -211,7 +216,7 @@ public class DosRead {
         int yMax = 0;
         int yMin = 0;
         int i;
-        //Definition du plus petit et du plus grand y
+
         for(i=start; i<stop;i=i+(stop-start)/10){
             if(sig[i]>yMax){
                 yMax = (int) sig[i];
@@ -220,33 +225,23 @@ public class DosRead {
                 yMin = (int) sig[i];
             }
         }
-        //Definition du titre de la fenetre
+
         StdDraw.setTitle(title);
-        //Definition de la taille de la fenetre
         StdDraw.setCanvasSize(1000,300);
-        //Definition de l'echelle horizontale
         StdDraw.setXscale(start - (double) (stop-start)/10, stop + (double) (stop-start)/10);
-        //dEFINITION DE L'ECHELLE VERTICALE
         StdDraw.setYscale(yMin - (double) (yMax-yMin)/10,yMax + (double) (yMax-yMin)/10);     
         
-        //Affichage de l'echelle de valeur verticale
         for(i=yMin; i<yMax;i=i+(yMax-yMin)/10){
             StdDraw.text(100, i, String.valueOf(i));
         }
-        
-        //Affichage de l'echelle de valeur horizontale
         for(i=start; i<stop;i=i+(stop-start)/10){
             StdDraw.text(i, 0, String.valueOf(i));
         }
-
-        //Verification du mode
         if(mode.equals("line")){
-            //affichage des lignes
             for(i=start+1;i<stop; i++){
                 StdDraw.line( (double) i-1, sig[i-1], i, sig[i]);
             }
         }else if(mode.equals("point")){
-            //affichage des points
             for(i=start;i<stop; i++){
                 StdDraw.point(i, sig[i]);
             }
