@@ -82,9 +82,10 @@ public class DosRead {
           e.printStackTrace();
       }
 
+      //Lecture des octets
       int bytesPerSample = (bitsPerSample / 8);
       audio = new double[dataSize / bytesPerSample];
-      
+
       for (int i = 0; i < audio.length; i += 1) {
           audio[i] = (short) ((audioData[i*2 + 1] << 8) | (audioData[i*2] & 0xFF));
       }
@@ -98,6 +99,8 @@ public class DosRead {
      * Reverse the negative values of the audio array
      */
     public void audioRectifier(){
+        //valeur absolue
+        //Si le nombre est negatif, on l'inverse
       for(int i=0; i<audio.length; i++){
           if(audio[i]<0){
             audio[i] *= -1;
@@ -111,6 +114,8 @@ public class DosRead {
      * @param n the number of samples to average
      */
     public void audioLPFilter(int n){
+        //Pour chaque valeur on fait la moyenne de n nombre avec n/2 nombre de chaque cote
+
         for(int i=0; i<audio.length; i++){
           double s = 0;
           int c = 0;
@@ -136,7 +141,9 @@ public class DosRead {
      */
     public void audioResampleAndThreshold(int period, int threshold){
         outputBits = new int[audio.length/period];
+       
         for(int i=0; i<outputBits.length; i++){
+            //Si une valeur est au dessus du threshold, ce sera un 1
             if(audio[i*period+period/2]<threshold){
                 outputBits[i] = 0;
             }else{
@@ -151,9 +158,8 @@ public class DosRead {
      * The next first symbol is the first bit of the first char.
      */
     public void decodeBitsToChar(){
-
+        //Detection de la squence d'intialisation
         int start = 0;
-
         for(int i = 0;i<outputBits.length-START_SEQ.length;i++){
             int j = 0;
             while(j<START_SEQ.length && outputBits[i+j]==START_SEQ[j]){
@@ -165,14 +171,17 @@ public class DosRead {
             }
         }
 
+        
         int n;
         decodedChars = new char[(outputBits.length-start)/8];
         
         for(int i = 0; i < decodedChars.length; i+=1){
+            //conversion de l'octet en entier
             n = 0;
             for(int j = 0; j < 8; j++){
                 n += outputBits[i*8+j+start]*Math.pow(2, (double) 7-j);
             }
+            //conversion de l'entier en caractere
             decodedChars[i] = (char) n;
         }
     }
@@ -182,8 +191,9 @@ public class DosRead {
      * @param data the array to print
      */
     public static void printIntArray(char[] data) {
+    
       System.out.print('[');
-      for(int i = 0; i < data.length; i++){
+      for(int i = 0; i < data.length; i++){//parcours du tableau
             if(i>0){
                 System.out.print(',');
             } 

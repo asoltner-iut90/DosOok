@@ -233,17 +233,7 @@ public class DosSend {
     * @param title the title of the window
     */
     public static void displaySig(double[] sig, int start, int stop, String mode, String title) {
-        /*StdDraw.setCanvasSize(1000,300);
-        StdDraw.setXscale(start, stop);
-        StdDraw.setYscale(-5,5);
-        StdDraw.setTitle(title);
-        int i;
-        for(i=start; i<stop;i=i+(stop-start)/10){
-            StdDraw.text(i, 0, String.valueOf(i));
-        }
-        for(i=start+1;i<stop; i++){
-            StdDraw.line(i-1, sig[i-1], i, sig[i]);
-        }*/
+
         int yMax = 1;
         int yMin = -1;
         int i;
@@ -270,8 +260,6 @@ public class DosSend {
         for(i=start; i<stop;i=i+(stop-start)/10+1){
             StdDraw.text(i, 0, String.valueOf(i));
         }
-
-        //System.out.println("mode : "+mode);
         
         if(mode.equals("line")){
             
