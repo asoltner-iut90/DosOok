@@ -1,3 +1,13 @@
+/*
+ * Nom du programme: DosSend
+ * Description: Programme Java pour la transmission audio de données modulées.
+ * Auteurs:
+ *   - Röthlin Gaël
+ *   - Soltner Audrick
+ * Date de création: 05/12/2023
+ * Dernière modification: 09/01/2024
+ */
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,8 +28,8 @@ public class DosSend {
     long taille;                // nombre d'octets de données à transmettre
     double duree ;              // durée de l'audio
     double[] dataMod;           // données modulées
-    char[] dataChar;    
-    byte[] bits;        // données en char
+    char[] dataChar;            // données en char    
+    byte[] bits;        
     FileOutputStream outStream; // flux de sortie pour le fichier .wav
 
     /**
@@ -92,7 +102,9 @@ public class DosSend {
             outStream.write(new byte[]{'d', 'a', 't', 'a'});// entête "data" pour les données audio
             writeLittleEndian((int) nbBytes, 4, outStream);// taille des données audio (en octets)
             double maxAmplitude = getMaxAmplitude(dataMod);// normalisation et écriture des données audio dans le fichier WAV
-            for (double sample : dataMod) {
+            int dataModLength = dataMod.length;
+            for (int i = 0; i < dataModLength; i++) {
+                double sample = dataMod[i];
                 short normalizedSample = (short) ((sample / maxAmplitude) * MAX_AMP);
                 writeLittleEndian(normalizedSample, FMT / 8, outStream);
             }
@@ -140,13 +152,17 @@ public class DosSend {
      */
      public byte[] charToBits(char[] chars) {
         List<Byte> bitsList = new ArrayList<>();
-        for (char c : chars) {
-            String binaryString = String.format("%8s", Integer.toBinaryString(c)).replace(' ', '0');// convertir chaque caractère en une représentation binaire sur 8 bits
-            // ajouter chaque bit à la liste
-            for (char bitChar : binaryString.toCharArray()) {
+        int charsLength = chars.length;
+        for (int j = 0; j < charsLength; j++) {
+            char c = chars[j];
+            String binaryString = String.format("%8s", Integer.toBinaryString(c)).replace(' ', '0');
+
+            for (int k = 0; k < binaryString.length(); k++) {
+                char bitChar = binaryString.charAt(k);
                 bitsList.add((byte) (bitChar - '0'));
             }
         }
+
         byte[] bitsArray = new byte[bitsList.size()];// convertir la liste de bits en un tableau de bytes
         for (int i = 0; i < bitsList.size(); i++) {
             bitsArray[i] = bitsList.get(i);
@@ -217,15 +233,55 @@ public class DosSend {
     * @param title the title of the window
     */
     public static void displaySig(double[] sig, int start, int stop, String mode, String title) {
-        StdDraw.setCanvasSize(1000,300);
+        /*StdDraw.setCanvasSize(1000,300);
         StdDraw.setXscale(start, stop);
         StdDraw.setYscale(-5,5);
+        StdDraw.setTitle(title);
         int i;
         for(i=start; i<stop;i=i+(stop-start)/10){
             StdDraw.text(i, 0, String.valueOf(i));
         }
         for(i=start+1;i<stop; i++){
             StdDraw.line(i-1, sig[i-1], i, sig[i]);
+        }*/
+        int yMax = 1;
+        int yMin = -1;
+        int i;
+
+        for(i=start; i<stop;i=i+(stop-start)/10){
+            if(sig[i]>yMax){
+                yMax = (int) sig[i];
+            }
+            if(sig[i]<yMin){
+                yMin = (int) sig[i];
+            }
+        }
+
+
+        StdDraw.setTitle(title);
+        StdDraw.setCanvasSize(1000,300);
+        StdDraw.setXscale(start - (double) (stop-start)/10, stop + (double) (stop-start)/10);
+        StdDraw.setYscale(yMin - (double) (yMax-yMin)/10,yMax + (double) (yMax-yMin)/10);
+        
+
+        for(i=yMin; i<yMax;i=i+(yMax-yMin)/10+1){
+            StdDraw.text(100, i, String.valueOf(i));
+        }
+        for(i=start; i<stop;i=i+(stop-start)/10+1){
+            StdDraw.text(i, 0, String.valueOf(i));
+        }
+
+        System.out.println("mode : "+mode);
+        
+        if(mode.equals("line")){
+            
+            for(i=start+1;i<stop; i++){
+                StdDraw.line(i -1, sig[i-1], i, sig[i]);
+            }
+        }else if(mode.equals("point")){
+            for(i=start;i<stop; i++){
+                StdDraw.point(i, sig[i]);
+            }
         }
     }
 
@@ -265,6 +321,16 @@ public class DosSend {
         StdDraw.show();
     }
     
+    public static void printIntArray(double[] data) {
+        System.out.print('[');
+        for(int i = 0; i < data.length; i++){
+              if(i>0){
+                  System.out.print(',');
+              } 
+              System.out.print(data[i]);
+        }
+        System.out.println(']');
+      }
     
     public static void main(String[] args) {
         DosSend dosSend = new DosSend("DosOok_message.wav");
@@ -279,8 +345,9 @@ public class DosSend {
         System.out.println("\tNombre d'échantillons : " + dosSend.dataMod.length);
         System.out.println("\tDurée : " + dosSend.duree + " s");
         System.out.println();
+        printIntArray(dosSend.dataMod);
 
-        displaySig(dosSend.dataMod, 1000, dosSend.dataMod.length, "line", "Signal modulé");
+        displaySig(dosSend.dataMod, 0, dosSend.dataMod.length, "line", "Signal modulé");
 
     }
 
