@@ -167,19 +167,44 @@ public class DosSend {
         dataMod = new double[totalSamples];// tableau pour stocker le signal modulé
         int currentIndex = 0;// indice pour suivre la position actuelle dans le signal modulé
         // générer le signal modulé
-        for (int bit : START_SEQ) {
-            double amplitude = bit == 1 ? modulationFactor : 0.0; 
-            for (int i = 0; i < FECH * symbolDuration; i++) {
-                dataMod[currentIndex++] = amplitude * Math.sin(2 * Math.PI * carrierFrequency * currentIndex / FECH);
-            }
-        }
-        for (byte bit : bits) {
-            double amplitude = bit == 1 ? modulationFactor : 0.0;
 
+
+
+        int startSeqLength = START_SEQ.length;
+
+        for (int j = 0; j < startSeqLength; j++) {
+            int bit = START_SEQ[j];
+            double amplitude;
+        
+            if (bit == 1) {
+                amplitude = modulationFactor;
+            } else {
+                amplitude = 0.0;
+            }
+        
             for (int i = 0; i < FECH * symbolDuration; i++) {
                 dataMod[currentIndex++] = amplitude * Math.sin(2 * Math.PI * carrierFrequency * currentIndex / FECH);
             }
         }
+
+
+        int bitsLength = bits.length;
+
+        for (int j = 0; j < bitsLength; j++) {
+            byte bit = bits[j];
+            double amplitude;
+
+            if (bit == 1) {
+                amplitude = modulationFactor;
+            } else {
+                amplitude = 0.0;
+            }
+        
+            for (int i = 0; i < FECH * symbolDuration; i++) {
+                dataMod[currentIndex++] = amplitude * Math.sin(2 * Math.PI * carrierFrequency * currentIndex / FECH);
+            }
+        }
+
     }
 
 
