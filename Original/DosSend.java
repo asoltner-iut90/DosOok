@@ -271,7 +271,7 @@ public class DosSend {
             StdDraw.text(i, 0, String.valueOf(i));
         }
 
-        System.out.println("mode : "+mode);
+        //System.out.println("mode : "+mode);
         
         if(mode.equals("line")){
             
@@ -345,7 +345,7 @@ public class DosSend {
         System.out.println("\tNombre d'échantillons : " + dosSend.dataMod.length);
         System.out.println("\tDurée : " + dosSend.duree + " s");
         System.out.println();
-        printIntArray(dosSend.dataMod);
+        //printIntArray(dosSend.dataMod);
 
         displaySig(dosSend.dataMod, 0, dosSend.dataMod.length, "line", "Signal modulé");
 
