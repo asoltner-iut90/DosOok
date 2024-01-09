@@ -184,10 +184,8 @@ public class DosSend {
         int totalSamples = (int) (FECH * duree);// nombre total d'échantillons
         dataMod = new double[totalSamples];// tableau pour stocker le signal modulé
         int currentIndex = 0;// indice pour suivre la position actuelle dans le signal modulé
-        // générer le signal modulé
-
-
-
+        
+         // générer le signal modulé
         int startSeqLength = START_SEQ.length;
 
         for (int j = 0; j < startSeqLength; j++) {
@@ -349,7 +347,7 @@ public class DosSend {
         System.out.println();
         //printIntArray(dosSend.dataMod);
 
-        displaySig(dosSend.dataMod, 0, dosSend.dataMod.length, "line", "Signal modulé");
+        displaySig(dosSend.dataMod, 1000, 3000, "line", "Signal modulé");
 
     }
 
