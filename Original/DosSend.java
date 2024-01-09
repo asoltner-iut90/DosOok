@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class DosSend{
+public class DosSend {
     final int FECH = 44100; // fréquence d'échantillonnage
     final int FP = 1000;    // fréquence de la porteuses
     final int BAUDS = 100;  // débit en symboles par seconde
@@ -18,7 +18,8 @@ public class DosSend{
     long taille;                // nombre d'octets de données à transmettre
     double duree ;              // durée de l'audio
     double[] dataMod;           // données modulées
-    char[] dataChar;            // données en char
+    char[] dataChar;    
+    byte[] bits;        // données en char
     FileOutputStream outStream; // flux de sortie pour le fichier .wav
 
     /**
@@ -59,54 +60,26 @@ public class DosSend{
      *
      */
     public void writeWavHeader() {
-    taille = (long) (FECH * duree);
-    long nbBytes = taille * CHANNELS * FMT / 8;
-
-    try {
-        // Entête RIFF
-        outStream.write(new byte[]{'R', 'I', 'F', 'F'});
-
-        // Taille totale du fichier (en octets) - 8, car RIFF et taille sont exclus
-        writeLittleEndian((int) (nbBytes + 36), 4, outStream);
-
-        // Format WAV
-        outStream.write(new byte[]{'W', 'A', 'V', 'E'});
-
-        // Sous-entête "fmt " pour le format des données
-        outStream.write(new byte[]{'f', 'm', 't', ' '});
-
-        // Taille du sous-entête "fmt " (16 pour PCM)
-        writeLittleEndian(16, 4, outStream);
-
-        // Code du format audio (1 pour PCM)
-        writeLittleEndian(1, 2, outStream);
-
-        // Nombre de canaux
-        writeLittleEndian(CHANNELS, 2, outStream);
-
-        // Fréquence d'échantillonnage
-        writeLittleEndian(FECH, 4, outStream);
-
-        // Débit binaire moyen (en octets par seconde)
-        writeLittleEndian(FECH * CHANNELS * FMT / 8, 4, outStream);
-
-        // Bloc d'alignement (nombre d'octets pour un échantillon, tous canaux confondus)
-        writeLittleEndian(CHANNELS * FMT / 8, 2, outStream);
-
-        // Bits par échantillon
-        writeLittleEndian(FMT, 2, outStream);
-
-        // Sous-entête "data" pour les données audio
-        outStream.write(new byte[]{'d', 'a', 't', 'a'});
-
-        // Taille des données audio (en octets)
-        writeLittleEndian((int) nbBytes, 4, outStream);
-
-        // Note : À ce stade, l'en-tête est complet, mais les données audio ne sont pas encore écrites
-    } catch (IOException e) {
-        System.out.println("Erreur d'écriture de l'en-tête : " + e.getMessage());
+        taille = (long) (FECH * duree);
+        long nbBytes = taille * CHANNELS * FMT / 8;
+        try {
+            outStream.write(new byte[]{'R', 'I', 'F', 'F'});// entête RIFF
+            writeLittleEndian((int) (nbBytes + 36), 4, outStream);// taille totale du fichier (en octets) - 8, car RIFF et taille sont exclus
+            outStream.write(new byte[]{'W', 'A', 'V', 'E'});// format WAV
+            outStream.write(new byte[]{'f', 'm', 't', ' '});// sous-entête "fmt " pour le format des données
+            writeLittleEndian(16, 4, outStream);// taille du sous-entête "fmt " (16 pour PCM)
+            writeLittleEndian(1, 2, outStream);// code du format audio (1 pour PCM)
+            writeLittleEndian(CHANNELS, 2, outStream);// nombre de canaux
+            writeLittleEndian(FECH, 4, outStream);// fréquence d'échantillonnage
+            writeLittleEndian(FECH * CHANNELS * FMT / 8, 4, outStream);// débit binaire moyen (en octets par seconde)
+            writeLittleEndian(CHANNELS * FMT / 8, 2, outStream);// bloc d'alignement (nombre d'octets pour un échantillon, tous canaux confondus)
+            writeLittleEndian(FMT, 2, outStream);// bits par échantillon
+            outStream.write(new byte[]{'d', 'a', 't', 'a'});// sous-entête "data" pour les données audio
+            writeLittleEndian((int) nbBytes, 4, outStream);// taille des données audio (en octets)
+        } catch (IOException e) {
+            System.out.println("Erreur d'écriture de l'en-tête : " + e.getMessage());
+        }
     }
-}
 
 
     /**
@@ -115,22 +88,14 @@ public class DosSend{
      */
     public void writeNormalizeWavData() {
         try {
-            // Taille des données audio (en octets)
-            long nbBytes = taille * CHANNELS * FMT / 8;
-    
-            // Entête "data" pour les données audio
-            outStream.write(new byte[]{'d', 'a', 't', 'a'});
-    
-            // Taille des données audio (en octets)
-            writeLittleEndian((int) nbBytes, 4, outStream);
-    
-            // Normalisation et écriture des données audio dans le fichier WAV
-            double maxAmplitude = getMaxAmplitude(dataMod);
+            long nbBytes = taille * CHANNELS * FMT / 8;// taille des données audio (en octets)
+            outStream.write(new byte[]{'d', 'a', 't', 'a'});// entête "data" pour les données audio
+            writeLittleEndian((int) nbBytes, 4, outStream);// taille des données audio (en octets)
+            double maxAmplitude = getMaxAmplitude(dataMod);// normalisation et écriture des données audio dans le fichier WAV
             for (double sample : dataMod) {
                 short normalizedSample = (short) ((sample / maxAmplitude) * MAX_AMP);
                 writeLittleEndian(normalizedSample, FMT / 8, outStream);
             }
-    
             System.out.println("Écriture des données audio normalisées terminée avec succès.");
         } catch (IOException e) {
             System.out.println("Erreur d'écriture des données audio normalisées : " + e.getMessage());
@@ -144,13 +109,11 @@ public class DosSend{
      */
     private double getMaxAmplitude(double[] data) {
         double maxAmplitude = 0;
-    
         for(int i = 0; i < data.length; i++){
             if(data[i]>maxAmplitude){
                 maxAmplitude = data[i];
             }
         }
-
         return maxAmplitude;
     }
 
@@ -162,18 +125,9 @@ public class DosSend{
      public int readTextData() {
         System.out.print("Entrez le texte à encoder : ");
         String inputText = input.nextLine();
-
-
-        // Convertir le texte en tableau de caractères
-        char[] textChars = inputText.toCharArray();
-    
-        // Stocker les caractères dans dataChar
-        dataChar = textChars;
-    
-        // Afficher le texte à encoder
-        System.out.println("Texte à encoder : " + inputText);
-
-        // Retourner le nombre de caractères lus
+        char[] textChars = inputText.toCharArray();// convertir le texte en tableau de caractères
+        dataChar = textChars;// stocker les caractères dans dataChar
+        System.out.println("Texte à encoder : " + inputText);// afficher le texte à encoder
         return dataChar.length;
     }
     
@@ -184,26 +138,19 @@ public class DosSend{
      * @param chars
      * @return byte array containing only 0 & 1
      */
-
-    public byte[] charToBits(char[] chars) {
+     public byte[] charToBits(char[] chars) {
         List<Byte> bitsList = new ArrayList<>();
-
         for (char c : chars) {
-            // Convertir chaque caractère en une représentation binaire sur 8 bits
-            String binaryString = String.format("%8s", Integer.toBinaryString(c)).replace(' ', '0');
-
-            // Ajouter chaque bit à la liste
+            String binaryString = String.format("%8s", Integer.toBinaryString(c)).replace(' ', '0');// convertir chaque caractère en une représentation binaire sur 8 bits
+            // ajouter chaque bit à la liste
             for (char bitChar : binaryString.toCharArray()) {
                 bitsList.add((byte) (bitChar - '0'));
             }
         }
-
-        // Convertir la liste de bits en un tableau de bytes
-        byte[] bitsArray = new byte[bitsList.size()];
+        byte[] bitsArray = new byte[bitsList.size()];// convertir la liste de bits en un tableau de bytes
         for (int i = 0; i < bitsList.size(); i++) {
             bitsArray[i] = bitsList.get(i);
         }
-
         return bitsArray;
     }
 
@@ -212,36 +159,22 @@ public class DosSend{
      * Modulate the data to send and apply the symbol throughput via BAUDS and FECH.
      * @param bits the data to modulate
      */
-
-    public void modulateData(byte[] bits) {
-        // Le facteur de modulation (peut être ajusté en fonction de vos besoins)
-        double modulationFactor = 1.0;
-
-        // Fréquence de la porteuse
-        double carrierFrequency = FP;
-
-        // Durée d'un symbole en secondes
-        double symbolDuration = 1.0 / BAUDS;
-
-        // Nombre total d'échantillons
-        int totalSamples = (int) (FECH * duree);
-
-        // Tableau pour stocker le signal modulé
-        dataMod = new double[totalSamples];
-
-        // Indice pour suivre la position actuelle dans le signal modulé
-        int currentIndex = 0;
-
-        // Générer le signal modulé
+     public void modulateData(byte[] bits) {
+        double modulationFactor = 1.0;// le facteur de modulation
+        double carrierFrequency = FP;// fréquence de la porteuse
+        double symbolDuration = 1.0 / BAUDS;// durée d'un symbole en secondes
+        int totalSamples = (int) (FECH * duree);// nombre total d'échantillons
+        dataMod = new double[totalSamples];// tableau pour stocker le signal modulé
+        int currentIndex = 0;// indice pour suivre la position actuelle dans le signal modulé
+        // générer le signal modulé
         for (int bit : START_SEQ) {
-            double amplitude = bit == 1 ? modulationFactor : 0.0; // Modulation OOK simple
-
+            double amplitude = bit == 1 ? modulationFactor : 0.0; 
             for (int i = 0; i < FECH * symbolDuration; i++) {
                 dataMod[currentIndex++] = amplitude * Math.sin(2 * Math.PI * carrierFrequency * currentIndex / FECH);
             }
         }
         for (byte bit : bits) {
-            double amplitude = bit == 1 ? modulationFactor : 0.0; // Modulation OOK simple
+            double amplitude = bit == 1 ? modulationFactor : 0.0;
 
             for (int i = 0; i < FECH * symbolDuration; i++) {
                 dataMod[currentIndex++] = amplitude * Math.sin(2 * Math.PI * carrierFrequency * currentIndex / FECH);
@@ -251,37 +184,27 @@ public class DosSend{
 
 
     /**
-     * Display a signal in a window
-     * @param sig  the signal to display
-     * @param start the first sample to display
-     * @param stop the last sample to display
-     * @param mode "line" or "point"
-     * @param title the title of the window
-     */
-
-     public static void displaySig(double[] sig, int start, int stop, String mode, String title) {
-        StdDraw.clear();
-        StdDraw.setCanvasSize(800, 600);
-        StdDraw.setXscale(0, sig.length);
-        StdDraw.setYscale(-1, 1);
-
-        if (title != null && !title.isEmpty()) {
-            // Utiliser un texte pour le titre
-            StdDraw.text(sig.length / 2.0, 1.1, title);
+    * Display a signal in a window
+    * @param sig   the signal to display
+    * @param start the first sample to display
+    * @param stop  the last sample to display
+    * @param mode  "line" or "point"
+    * @param title the title of the window
+    */
+    public static void displaySig(double[] sig, int start, int stop, String mode, String title) {
+        StdDraw.setCanvasSize(1000,300);
+        StdDraw.setXscale(start, stop);
+        StdDraw.setYscale(-5,5);
+        int i;
+        for(i=start; i<stop;i=i+(stop-start)/10){
+            StdDraw.text(i, 0, String.valueOf(i));
         }
-
-        if (mode.equals("line")) {
-            for (int i = start + 1; i <= stop; i++) {
-                StdDraw.line(i - 1, sig[i - 1], i, sig[i]);
-            }
-        } else if (mode.equals("point")) {
-            for (int i = start; i <= stop; i++) {
-                StdDraw.point(i, sig[i]);
-            }
+        for(i=start+1;i<stop; i++){
+            StdDraw.line(i-1, sig[i-1], i, sig[i]);
         }
-
-        StdDraw.show();
     }
+
+    
 
     /**
      * Display signals in a window using StdDraw
@@ -317,30 +240,22 @@ public class DosSend{
         StdDraw.show();
     }
     
+    
     public static void main(String[] args) {
-
-        // créé un objet DosSend
         DosSend dosSend = new DosSend("DosOok_message.wav");
-        // lit le texte à envoyer depuis l'entrée standard
-        // et calcule la durée de l'audio correspondant
-        dosSend.duree = (double)(dosSend.readTextData()+dosSend.START_SEQ.length/8)*8.0/dosSend.BAUDS;
-
-        // génère le signal modulé après avoir converti les données en bits
-        dosSend.modulateData(dosSend.charToBits(dosSend.dataChar));
-        // écrit l'entête du fichier wav
+        dosSend.duree = (double) (dosSend.readTextData() + dosSend.START_SEQ.length / 8) * 8.0 / dosSend.BAUDS;
+        dosSend.bits = dosSend.charToBits(dosSend.dataChar);
+        dosSend.modulateData(dosSend.bits);
         dosSend.writeWavHeader();
-        // écrit les données audio dans le fichier wav
         dosSend.writeNormalizeWavData();
 
-
-        // affiche les caractéristiques du signal dans la console
-        System.out.println("Message : "+String.valueOf(dosSend.dataChar));
-        System.out.println("\tNombre de symboles : "+dosSend.dataChar.length);
-        System.out.println("\tNombre d'échantillons : "+dosSend.dataMod.length);
-        System.out.println("\tDurée : "+dosSend.duree+" s");
+        System.out.println("Message : " + String.valueOf(dosSend.dataChar));
+        System.out.println("\tNombre de symboles : " + dosSend.dataChar.length);
+        System.out.println("\tNombre d'échantillons : " + dosSend.dataMod.length);
+        System.out.println("\tDurée : " + dosSend.duree + " s");
         System.out.println();
-        // exemple d'affichage du signal modulé dans une fenêtre graphique
-        displaySig(dosSend.dataMod, 1000, 3000, "line", "Signal modulé");
+
+        displaySig(dosSend.dataMod, 1000, dosSend.dataMod.length, "line", "Signal modulé");
 
     }
 
