@@ -102,6 +102,9 @@ public class DosSend {
             outStream.write(new byte[]{'d', 'a', 't', 'a'});// entête "data" pour les données audio
             writeLittleEndian((int) nbBytes, 4, outStream);// taille des données audio (en octets)
             double maxAmplitude = getMaxAmplitude(dataMod);// normalisation et écriture des données audio dans le fichier WAV
+            if(maxAmplitude==0){
+                maxAmplitude = 1;
+            }
             int dataModLength = dataMod.length;
             for (int i = 0; i < dataModLength; i++) {
                 double sample = dataMod[i];
@@ -276,7 +279,7 @@ public class DosSend {
         if(mode.equals("line")){
             
             for(i=start+1;i<stop; i++){
-                StdDraw.line(i -1, sig[i-1], i, sig[i]);
+                StdDraw.line((double) i -1, sig[i-1], i, sig[i]);
             }
         }else if(mode.equals("point")){
             for(i=start;i<stop; i++){
@@ -309,7 +312,7 @@ public class DosSend {
         for (double[] sig : listOfSigs) {
             if (mode.equals("line")) {
                 for (int i = start + 1; i <= stop; i++) {
-                    StdDraw.line(i - 1, sig[i - 1], i, sig[i]);
+                    StdDraw.line((double) i - 1, sig[i - 1], i, sig[i]);
                 }
             } else if (mode.equals("point")) {
                 for (int i = start; i <= stop; i++) {

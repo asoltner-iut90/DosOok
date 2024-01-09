@@ -1,5 +1,5 @@
 Fichier audio: DosOok_message.wav
 	Sample Rate: 44100 Hz
 	Bits per Sample: 16 bits
-	Data Size: 261072 bytes
-Message décodé : [V,o,i,c,i, ,d,u, ,t,e,x,t,e,., ,C,',e,s,t, ,t,r,e,s, ,o,r,i,g,i,n,a,l,.]
+	Data Size: 254016 bytes
+Message décodé : [U,n, ,m,e,s,s,a,g,e, ,t,r,e,s, ,o,r,i,g,i,n,a,l, ,a, ,e,n,c,o,d,e,r,.]
