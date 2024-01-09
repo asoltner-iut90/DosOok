@@ -277,8 +277,7 @@ public class DosRead {
             printIntArray(dosRead.decodedChars);
         }
 
-        displaySig(dosRead.audio, 0, dosRead.audio.length, "line", "Signal audio");
-        //displaySig(dosRead.audio, 0, 3000, "line", "Signal audio");
+        displaySig(dosRead.audio, 0, dosRead.audio.length-1, "line", "Signal audio");
 
         // Close the file input stream
         try {
