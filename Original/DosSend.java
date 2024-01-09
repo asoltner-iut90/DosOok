@@ -178,48 +178,54 @@ public class DosSend {
      * @param bits the data to modulate
      */
      public void modulateData(byte[] bits) {
-        double modulationFactor = 1.0;// le facteur de modulation
-        double carrierFrequency = FP;// fréquence de la porteuse
-        double symbolDuration = 1.0 / BAUDS;// durée d'un symbole en secondes
-        int totalSamples = (int) (FECH * duree);// nombre total d'échantillons
-        dataMod = new double[totalSamples];// tableau pour stocker le signal modulé
-        int currentIndex = 0;// indice pour suivre la position actuelle dans le signal modulé
+        double modulationFactor = 1.0;//le facteur de modulation
+        double carrierFrequency = FP;//fréquence de la porteuse
+        double symbolDuration = 1.0 / BAUDS;//durée d'un symbole en secondes
+    
+        int totalSamples = (int) (FECH * duree);//calcul du nombre total d'échantillons dans le signal modulé
         
-         // générer le signal modulé
-        int startSeqLength = START_SEQ.length;
-
+        dataMod = new double[totalSamples];//initialisation du tableau pour stocker le signal modulé
+        
+        int currentIndex = 0;//indice pour suivre la position actuelle dans le signal modulé
+    
+        int startSeqLength = START_SEQ.length;//génération du signal modulé pour la séquence de démarrage (START_SEQ)
+        
         for (int j = 0; j < startSeqLength; j++) {
             int bit = START_SEQ[j];
             double amplitude;
         
+            //ajustement de l'amplitude en fonction de la valeur du bit
             if (bit == 1) {
                 amplitude = modulationFactor;
             } else {
                 amplitude = 0.0;
             }
         
+            //génération du signal modulé pour chaque bit de la séquence de démarrage
             for (int i = 0; i < FECH * symbolDuration; i++) {
                 dataMod[currentIndex++] = amplitude * Math.sin(2 * Math.PI * carrierFrequency * currentIndex / FECH);
             }
         }
-
-
-        int bitsLength = bits.length;
-
+    
+        int bitsLength = bits.length;//génération du signal modulé pour les bits de données
+    
         for (int j = 0; j < bitsLength; j++) {
             byte bit = bits[j];
             double amplitude;
-
+    
+            //ajustement de l'amplitude en fonction de la valeur du bit
             if (bit == 1) {
                 amplitude = modulationFactor;
             } else {
                 amplitude = 0.0;
             }
         
+            //génération du signal modulé pour chaque bit de données
             for (int i = 0; i < FECH * symbolDuration; i++) {
                 dataMod[currentIndex++] = amplitude * Math.sin(2 * Math.PI * carrierFrequency * currentIndex / FECH);
             }
         }
+    }
 
     }
 
