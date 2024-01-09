@@ -142,12 +142,27 @@ public class DosRead {
      * The next first symbol is the first bit of the first char.
      */
     public void decodeBitsToChar(){
+
+        int start = 0;
+
+        for(int i = 0;i<outputBits.length-START_SEQ.length;i++){
+            int j = 0;
+            while(j<START_SEQ.length && outputBits[i+j]==START_SEQ[j]){
+                j++;
+            }
+            if(j==START_SEQ.length){
+                start=i+START_SEQ.length;
+                break;
+            }
+        }
+
         int n;
-        decodedChars = new char[outputBits.length/8];
+        decodedChars = new char[(outputBits.length-start)/8];
+        
         for(int i = 0; i < decodedChars.length; i+=1){
             n = 0;
             for(int j = 0; j < 8; j++){
-                n += outputBits[i*8+j]*Math.pow(2, (double) 7-j);
+                n += outputBits[i*8+j+start]*Math.pow(2, (double) 7-j);
             }
             decodedChars[i] = (char) n;
         }
@@ -192,13 +207,10 @@ public class DosRead {
             }
         }
 
-
         StdDraw.setTitle(title);
         StdDraw.setCanvasSize(1000,300);
         StdDraw.setXscale(start - (double) (stop-start)/10, stop + (double) (stop-start)/10);
-        StdDraw.setYscale(yMin - (double) (yMax-yMin)/10,yMax + (double) (yMax-yMin)/10);
-    
-        
+        StdDraw.setYscale(yMin - (double) (yMax-yMin)/10,yMax + (double) (yMax-yMin)/10);     
         
         for(i=yMin; i<yMax;i=i+(yMax-yMin)/10){
             StdDraw.text(100, i, String.valueOf(i));
@@ -208,7 +220,7 @@ public class DosRead {
         }
         if(mode.equals("line")){
             for(i=start+1;i<stop; i++){
-                StdDraw.line(i, sig[i-1], i, sig[i]);
+                StdDraw.line( (double) i-1, sig[i-1], i, sig[i]);
             }
         }else if(mode.equals("point")){
             for(i=start;i<stop; i++){
