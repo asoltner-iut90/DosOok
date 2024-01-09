@@ -171,7 +171,7 @@ public class DosRead {
             }
         }
 
-        
+        //Decodage des caractères
         int n;
         decodedChars = new char[(outputBits.length-start)/8];
         
