@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class DosSend {
+public class DosSend{
     final int FECH = 44100; // fréquence d'échantillonnage
     final int FP = 1000;    // fréquence de la porteuses
     final int BAUDS = 100;  // débit en symboles par seconde
@@ -145,10 +145,12 @@ public class DosSend {
     private double getMaxAmplitude(double[] data) {
         double maxAmplitude = 0;
     
-        for (double sample : data) {
-            maxAmplitude = Math.max(maxAmplitude, Math.abs(sample));
+        for(int i = 0; i < data.length; i++){
+            if(data[i]>maxAmplitude){
+                maxAmplitude = data[i];
+            }
         }
-    
+
         return maxAmplitude;
     }
 
@@ -160,23 +162,17 @@ public class DosSend {
      public int readTextData() {
         System.out.print("Entrez le texte à encoder : ");
         String inputText = input.nextLine();
-    
-        // Ajout de la séquence de synchronisation au début
-        StringBuilder textWithSync = new StringBuilder();
-        for (int syncBit : START_SEQ) {
-            textWithSync.append(syncBit);
-        }
-        textWithSync.append(inputText);
-    
+
+
         // Convertir le texte en tableau de caractères
-        char[] textChars = textWithSync.toString().toCharArray();
+        char[] textChars = inputText.toCharArray();
     
         // Stocker les caractères dans dataChar
         dataChar = textChars;
     
         // Afficher le texte à encoder
-        System.out.println("Texte à encoder : " + String.valueOf(dataChar));
-    
+        System.out.println("Texte à encoder : " + inputText);
+
         // Retourner le nombre de caractères lus
         return dataChar.length;
     }
@@ -237,6 +233,13 @@ public class DosSend {
         int currentIndex = 0;
 
         // Générer le signal modulé
+        for (int bit : START_SEQ) {
+            double amplitude = bit == 1 ? modulationFactor : 0.0; // Modulation OOK simple
+
+            for (int i = 0; i < FECH * symbolDuration; i++) {
+                dataMod[currentIndex++] = amplitude * Math.sin(2 * Math.PI * carrierFrequency * currentIndex / FECH);
+            }
+        }
         for (byte bit : bits) {
             double amplitude = bit == 1 ? modulationFactor : 0.0; // Modulation OOK simple
 

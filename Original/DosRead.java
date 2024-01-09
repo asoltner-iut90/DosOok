@@ -1,4 +1,3 @@
-
 import java.io.*;
 
 public class DosRead {
@@ -65,9 +64,7 @@ public class DosRead {
      * and convert it to an array of doubles
      * that becomes the audio attribute
      */
-
-    
-     
+ 
     public void readAudioDouble(){
       byte[] audioData = new byte[dataSize];
       try {
@@ -81,7 +78,6 @@ public class DosRead {
       
       for (int i = 0; i < audio.length; i += 1) {
           audio[i] = (short) ((audioData[i*2 + 1] << 8) | (audioData[i*2] & 0xFF));
-          //audio[i] = byteArrayToInt(audioData, i*2, 16);
       }
   }
 
@@ -106,17 +102,21 @@ public class DosRead {
      * @param n the number of samples to average
      */
     public void audioLPFilter(int n){
-        n = n/2;
         for(int i=0; i<audio.length; i++){
           double s = 0;
           int c = 0;
-          for(int j = i-n; j< i+n+1;j++){
+          for(int j = i-n/2; j< i+n/2+1;j++){
               if(j>=0 && j<audio.length){
                 c++;
-                s+=audio[j]*(1.0/(2*n));
+                s+=audio[j];
               }
           }
-          audio[i] = s;
+          if(c==0){
+            audio[i] = 0;
+          }else{
+            audio[i] = s/c;
+          }
+          
       }
     }
 
@@ -127,14 +127,12 @@ public class DosRead {
      */
     public void audioResampleAndThreshold(int period, int threshold){
         outputBits = new int[audio.length/period];
-        System.out.print(outputBits.length);
         for(int i=0; i<outputBits.length; i++){
             if(audio[i*period+period/2]<threshold){
                 outputBits[i] = 0;
             }else{
                 outputBits[i] = 1;
             }
-            System.out.print(outputBits[i]);
         }
     }
 
@@ -144,10 +142,14 @@ public class DosRead {
      * The next first symbol is the first bit of the first char.
      */
     public void decodeBitsToChar(){
-        for(int i = 0; i < outputBits.length; i+=8){
-            for(int j = i; j < i+8; j++){
-                System.out.println(outputBits[j]);
+        int n;
+        decodedChars = new char[outputBits.length/8];
+        for(int i = 0; i < decodedChars.length; i+=1){
+            n = 0;
+            for(int j = 0; j < 8; j++){
+                n += outputBits[i*8+j]*Math.pow(2, (double) 7-j);
             }
+            decodedChars[i] = (char) n;
         }
     }
 
@@ -156,9 +158,14 @@ public class DosRead {
      * @param data the array to print
      */
     public static void printIntArray(char[] data) {
-      /*
-        À compléter
-      */
+      System.out.print('[');
+      for(int i = 0; i < data.length; i++){
+            if(i>0){
+                System.out.print(',');
+            } 
+            System.out.print(data[i]);
+      }
+      System.out.println(']');
     }
 
 
@@ -172,24 +179,32 @@ public class DosRead {
      */
     public static void displaySig(double[] sig, int start, int stop, String mode, String title){
 
-        int maxy = 32768,miny = -32768;
+        int yMax = 32768;
+        int yMin = -32768;
 
+        StdDraw.setTitle(title);
         StdDraw.setCanvasSize(1000,300);
         StdDraw.setXscale(start, stop);
-        StdDraw.setYscale(miny,maxy);
-        
-
+        StdDraw.setYscale(yMin,yMax);
+    
         int i;
         
-        for(i=miny; i<maxy;i=i+(maxy-miny)/10){
+        for(i=yMin; i<yMax;i=i+(yMax-yMin)/10){
             StdDraw.text(100, i, String.valueOf(i));
         }
         for(i=start; i<stop;i=i+(stop-start)/10){
             StdDraw.text(i, 0, String.valueOf(i));
         }
-        for(i=start+1;i<stop; i++){
-            StdDraw.line(i, sig[i-1], i, sig[i]);
+        if(mode.equals("line")){
+            for(i=start+1;i<stop; i++){
+                StdDraw.line(i, sig[i-1], i, sig[i]);
+            }
+        }else if(mode.equals("point")){
+            for(i=start;i<stop; i++){
+                StdDraw.point(i, sig[i]);
+            }
         }
+
         
     }
 
@@ -222,16 +237,16 @@ public class DosRead {
         dosRead.audioLPFilter(150);
 
         // Resample audio data and apply a threshold to output only 0 & 1
-        dosRead.audioResampleAndThreshold(dosRead.sampleRate/BAUDS, 1200 );
+        dosRead.audioResampleAndThreshold(dosRead.sampleRate/BAUDS, 6650 );
 
-       // dosRead.decodeBitsToChar();
+        dosRead.decodeBitsToChar();
         if (dosRead.decodedChars != null){
             System.out.print("Message décodé : ");
             printIntArray(dosRead.decodedChars);
         }
 
-        //displaySig(dosRead.audio, 0, dosRead.audio.length-1, "line", "Signal audio");
-        displaySig(dosRead.audio, 0, 3000, "line", "Signal audio");
+        displaySig(dosRead.audio, 0, dosRead.audio.length-1, "point", "Signal audio");
+        //displaySig(dosRead.audio, 0, 3000, "line", "Signal audio");
 
         // Close the file input stream
         try {
