@@ -1,3 +1,12 @@
+/*
+ * Nom du programme: DosRead
+ * Description: Programme Java pour la transmission audio de données modulées.
+ * Auteurs:
+ *   - Soltner Audrick
+ * Date de création: 05/12/2023
+ * Dernière modification: 09/01/2024
+ */
+
 import java.io.*;
 
 public class DosRead {
