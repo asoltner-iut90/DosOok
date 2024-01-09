@@ -195,8 +195,8 @@ public class DosRead {
 
         StdDraw.setTitle(title);
         StdDraw.setCanvasSize(1000,300);
-        StdDraw.setXscale(start - (double) (stop-start)/10, stop - (double) (stop-start)/10);
-        StdDraw.setYscale(yMin - (double) (yMax-yMin)/10,yMax - (double) (yMax-yMin)/10);
+        StdDraw.setXscale(start - (double) (stop-start)/10, stop + (double) (stop-start)/10);
+        StdDraw.setYscale(yMin - (double) (yMax-yMin)/10,yMax + (double) (yMax-yMin)/10);
     
         
         
@@ -256,7 +256,7 @@ public class DosRead {
             printIntArray(dosRead.decodedChars);
         }
 
-        displaySig(dosRead.audio, 0, dosRead.audio.length-1, "line", "Signal audio");
+        displaySig(dosRead.audio, 0, dosRead.audio.length, "line", "Signal audio");
         //displaySig(dosRead.audio, 0, 3000, "line", "Signal audio");
 
         // Close the file input stream
