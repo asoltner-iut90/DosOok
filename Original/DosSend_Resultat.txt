@@ -1,7 +1,0 @@
-Entrez le texte à encoder : Texte à encoder : Un message tres original a encoder.
-Écriture des données audio normalisées terminée avec succès.
-Message : Un message tres original a encoder.
-	Nombre de symboles : 35
-	Nombre d'échantillons : 127008
-	Durée : 2.88 s
-
