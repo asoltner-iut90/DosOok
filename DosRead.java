@@ -221,6 +221,7 @@ public class DosRead {
             }
         }
 
+
         //Definition du titre de la fenetre
         StdDraw.setTitle(title);
         //Definition de la taille de la fenetre
